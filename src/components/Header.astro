@@ -1,0 +1,101 @@
+---
+const navLinks = [
+  { href: "#servicios", label: "Servicios" },
+  { href: "#tecnologia", label: "Tecnología" },
+  { href: "#por-que-nosotros", label: "Por qué nosotros" },
+  { href: "#contacto", label: "Contacto" },
+];
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+  <nav class="mx-auto max-w-7xl flex items-center justify-between px-6 py-4">
+    <a href="/" class="text-xl font-bold text-primary-900">
+      Lógica<span class="text-accent-500">Hogar</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <ul class="hidden md:flex items-center gap-8">
+      {navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class="text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+      <li>
+        <a
+          href="#contacto"
+          class="rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800 transition-colors"
+        >
+          Contactar
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mobile menu button -->
+    <button
+      id="mobile-menu-btn"
+      class="md:hidden p-2 text-gray-600"
+      aria-label="Abrir menú"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white px-6 pb-4">
+    <ul class="flex flex-col gap-3 pt-3">
+      {navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class="mobile-link block text-sm font-medium text-gray-600 hover:text-primary-700 py-1"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+      <li class="pt-2">
+        <a
+          href="#contacto"
+          class="mobile-link block w-full rounded-lg bg-primary-700 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-primary-800"
+        >
+          Contactar
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById("mobile-menu-btn");
+  const menu = document.getElementById("mobile-menu");
+
+  function closeMenu() {
+    menu?.classList.add("hidden");
+    btn?.setAttribute("aria-expanded", "false");
+  }
+
+  btn?.addEventListener("click", () => {
+    const isOpen = menu?.classList.toggle("hidden") === false;
+    btn.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.querySelectorAll(".mobile-link").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu?.classList.contains("hidden")) {
+      closeMenu();
+      btn?.focus();
+    }
+  });
+</script>

@@ -1,0 +1,56 @@
+---
+const stack = [
+  {
+    label: "Cerebro",
+    tech: "Home Assistant",
+    description: "Plataforma open-source corriendo en hardware dedicado o Proxmox. Control total desde tu red local.",
+    icon: "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+  },
+  {
+    label: "Protocolo",
+    tech: "Zigbee 3.0",
+    description: "Red mesh de bajo consumo que no depende de Wi-Fi. Más dispositivos, mayor estabilidad, menor interferencia.",
+    icon: "M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0",
+  },
+  {
+    label: "Actuadores",
+    tech: "Zigbee & Wi-Fi",
+    description: "Módulos de relé, dimmers y persianas. Compromiso óptimo entre precio y calidad según cada caso.",
+    icon: "M13 10V3L4 14h7v7l9-11h-7z",
+  },
+  {
+    label: "Interfaz",
+    tech: "Dashboards & Voz",
+    description: "Paneles personalizados en tablets y celulares. Control por voz 100% local, sin escuchas en la nube.",
+    icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z",
+  },
+];
+---
+
+<section id="tecnologia" class="py-24">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold text-primary-900 sm:text-4xl">
+        Stack Tecnológico
+      </h2>
+      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        Usamos tecnología probada y abierta. Sin ataduras a una sola marca, sin suscripciones mensuales.
+      </p>
+    </div>
+
+    <div class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {stack.map((item) => (
+        <div class="group rounded-xl border border-gray-200 p-6 text-center hover:border-primary-300 hover:shadow-md transition-all">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 group-hover:bg-primary-100 transition-colors">
+            <svg class="h-7 w-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
+            </svg>
+          </div>
+          <p class="mt-4 text-xs font-semibold uppercase tracking-wider text-accent-600">{item.label}</p>
+          <h3 class="mt-1 text-lg font-bold text-primary-900">{item.tech}</h3>
+          <p class="mt-2 text-sm text-gray-600 leading-relaxed">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

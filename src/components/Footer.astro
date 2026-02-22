@@ -1,0 +1,44 @@
+---
+const currentYear = new Date().getFullYear();
+
+const links = [
+  { href: "#servicios", label: "Servicios" },
+  { href: "#tecnologia", label: "Tecnología" },
+  { href: "#por-que-nosotros", label: "Por qué nosotros" },
+  { href: "#contacto", label: "Contacto" },
+];
+---
+
+<footer class="bg-primary-950 border-t border-primary-800">
+  <div class="mx-auto max-w-7xl px-6 py-12">
+    <div class="flex flex-col items-center gap-8 md:flex-row md:justify-between">
+      <div>
+        <a href="/" class="text-xl font-bold text-white">
+          Lógica<span class="text-accent-400">Hogar</span>
+        </a>
+        <p class="mt-2 text-sm text-primary-400">Tu casa, con sentido común.</p>
+      </div>
+
+      <nav>
+        <ul class="flex flex-wrap justify-center gap-6">
+          {links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-sm text-primary-400 hover:text-white transition-colors"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="mt-8 border-t border-primary-800 pt-8 text-center">
+      <p class="text-sm text-primary-500">
+        &copy; {currentYear} LógicaHogar. Todos los derechos reservados.
+      </p>
+    </div>
+  </div>
+</footer>

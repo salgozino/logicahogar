@@ -1,0 +1,63 @@
+---
+const services = [
+  {
+    title: "Consultoría Pre-Construcción",
+    description:
+      "Evitá errores costosos en obra gris. Diseñamos el plano de infraestructura inteligente: ubicación de cajas, previsión de cable neutro, puntos de acceso y todo lo necesario para que tu casa esté preparada desde los cimientos.",
+    icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+    details: [
+      "Plano de infraestructura domótica",
+      "Coordinación con arquitectos y directores de obra",
+      "Previsión de cableado y puntos de red",
+    ],
+  },
+  {
+    title: "Retrofit e Implementación",
+    description:
+      "Tu casa ya está construida pero querés hacerla inteligente. Instalamos módulos detrás de tus teclas existentes y redes mesh inalámbricas, sin obras civiles pesadas.",
+    icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+    details: [
+      "Módulos inteligentes sin obras",
+      "Redes Mesh Zigbee de alta confiabilidad",
+      "Integración con Home Assistant",
+    ],
+  },
+];
+---
+
+<section id="servicios" class="py-24 bg-gray-50">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-bold text-primary-900 sm:text-4xl">
+        Nuestros Servicios
+      </h2>
+      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        Ya sea que estés construyendo o que tu casa ya esté terminada, tenemos una solución para vos.
+      </p>
+    </div>
+
+    <div class="mt-16 grid gap-8 md:grid-cols-2">
+      {services.map((service) => (
+        <div class="rounded-2xl bg-white p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+            <svg class="h-6 w-6 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={service.icon} />
+            </svg>
+          </div>
+          <h3 class="mt-6 text-xl font-semibold text-primary-900">{service.title}</h3>
+          <p class="mt-3 text-gray-600 leading-relaxed">{service.description}</p>
+          <ul class="mt-6 space-y-2">
+            {service.details.map((detail) => (
+              <li class="flex items-center gap-2 text-sm text-gray-700">
+                <svg class="h-4 w-4 text-accent-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {detail}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
