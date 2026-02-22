@@ -1,0 +1,18 @@
+<svg width="250" height="200" viewBox="0 0 250 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="lh-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#2dd4bf" /> <stop offset="100%" stop-color="#3b82f6" /> </linearGradient>
+    </defs>
+    
+    <g stroke="url(#lh-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M40 85 V 55 L 125 15 L 210 55 V 85 C 210 115, 180 130, 125 130 C 70 130, 40 115, 40 85 Z" />
+        
+        <path d="M 60 95 C 80 65, 110 115, 150 90" />
+        
+        <circle cx="175" cy="85" r="4" fill="url(#lh-gradient)" stroke="none" />
+    </g>
+    
+    <text x="125" y="180" text-anchor="middle" font-family="'Varela Round', 'Arial Rounded MT Bold', 'Helvetica Neue', sans-serif" font-weight="600" font-size="32" fill="#1e3a8a">
+        LógicaHogar
+    </text>
+</svg>
