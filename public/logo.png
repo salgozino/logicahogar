@@ -4,9 +4,9 @@
 <svg
    version="1.1"
    id="svg14908"
-   width="1779.9519"
-   height="1140.373"
-   viewBox="0 0 1779.9519 1140.373"
+   width="2816"
+   height="1536"
+   viewBox="0 0 2816 1536"
    sodipodi:docname="logo.png"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -33,9 +33,9 @@
        xlink:href="#linearGradient16571"
        id="linearGradient16573"
        x1="1065.2893"
-       y1="585.7923"
+       y1="585.79232"
        x2="1750.4205"
-       y2="585.7923"
+       y2="585.79232"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -60,8 +60,7 @@
   <g
      inkscape:groupmode="layer"
      inkscape:label="Image"
-     id="g14914"
-     transform="translate(-528.5,-217.0325)">
+     id="g14914">
     <path
        id="path16169"
        style="fill:url(#linearGradient16573);fill-opacity:1"
