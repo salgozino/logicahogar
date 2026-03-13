@@ -51,16 +51,22 @@
         <div class="flex items-start gap-4">
           <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-100">
             <svg class="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
           </div>
           <div>
-            <h3 class="font-semibold text-primary-900">Showroom</h3>
+            <h3 class="font-semibold text-primary-900">Visita a domicilio</h3>
             <p class="mt-1 text-gray-600">
-              Visitá nuestra casa demo con cita previa
+              Vamos a tu casa, recorremos los espacios y diseñamos el sistema juntos.
             </p>
           </div>
+        </div>
+
+        <div class="rounded-lg border border-primary-100 bg-primary-50 px-5 py-4">
+          <p class="text-sm text-primary-800">
+            <span class="font-semibold">Zona de cobertura:</span> Instalaciones solamente en San Luis por ahora. Asesoría para todos.
+            ¿Estás en otra zona? <a href="mailto:info@logicahogar.com.ar" class="underline hover:text-primary-600">Consultanos igual.</a>
+          </p>
         </div>
       </div>
 
@@ -73,7 +79,7 @@
         class="rounded-2xl bg-white p-8 shadow-sm border border-gray-100"
       >
         <input type="hidden" name="form-name" value="contacto" />
-        <p class="hidden">
+        <p class="hidden" aria-hidden="true">
           <label>No completar: <input name="bot-field" /></label>
         </p>
 
