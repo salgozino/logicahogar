@@ -1,0 +1,64 @@
+---
+const examples = [
+  {
+    title: "Las luces se apagan solas al salir",
+    description: "Nunca más vas a dejar la luz prendida. El sistema detecta que no hay nadie y apaga todo.",
+    icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
+  },
+  {
+    title: "El aire se corta si abrís una ventana",
+    description: "El aire acondicionado se apaga solo cuando detecta que una ventana está abierta. Ahorro real en la factura.",
+    icon: "M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z",
+  },
+  {
+    title: "Las persianas se cierran al atardecer",
+    description: "Programadas por hora o por sensor de luminosidad. Tu casa se adapta al ritmo del día sin que hagas nada.",
+    icon: "M12 3v1m0 16v1M4.22 4.22l.707.707m12.02 12.02l.707.707M1 12h2m18 0h2M4.22 19.78l.707-.707M18.364 5.636l.707-.707",
+  },
+  {
+    title: "Alerta si alguien entra mientras no estás",
+    description: "Recibís una notificación en el celular al instante. Todo procesado en tu casa, sin cámaras en la nube.",
+    icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+  },
+  {
+    title: "La calefacción se prende antes de que llegués",
+    description: "Activala desde el celular en el camino. Llegás a casa y ya está a temperatura.",
+    icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z",
+  },
+  {
+    title: "Todo apagado con un solo toque",
+    description: "Un botón junto a la cama apaga todas las luces, cierra las persianas y activa el modo noche.",
+    icon: "M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z",
+  },
+];
+---
+
+<section id="automatizaciones" class="py-24 bg-white">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="text-center">
+      <p class="text-sm font-semibold uppercase tracking-wider text-accent-600">Domótica = tu casa que funciona sola</p>
+      <h2 class="mt-2 text-3xl font-bold text-primary-900 sm:text-4xl">
+        ¿Qué podés automatizar?
+      </h2>
+      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        Estas son algunas de las cosas que tu casa puede hacer por vos. Sin apps complicadas, sin depender de internet.
+      </p>
+    </div>
+
+    <div class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {examples.map((example) => (
+        <div class="flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50 p-6">
+          <div class="shrink-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100">
+            <svg class="h-5 w-5 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={example.icon} />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-primary-900">{example.title}</h3>
+            <p class="mt-1 text-sm text-gray-600 leading-relaxed">{example.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
