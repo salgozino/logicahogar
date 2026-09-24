@@ -4,11 +4,13 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  noindex?: boolean;
 }
 
 const {
   title = "LógicaHogar — Tu casa, con sentido común",
   description = "Consultoría e instalación de domótica profesional con procesamiento local. Privacidad total, autonomía y escalabilidad para tu hogar inteligente.",
+  noindex = false,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -23,6 +25,7 @@ const ogImageURL = new URL("/og-image.png", Astro.site);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <title>{title}</title>
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
 

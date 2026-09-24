@@ -1,0 +1,686 @@
+---
+// Private quote builder. Access is protected by netlify/edge-functions/presupuestos-auth.ts.
+// Drafts live in the browser (localStorage); the PDF is produced with the browser's print dialog.
+import Layout from "../layouts/Layout.astro";
+
+const inputClass =
+  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none";
+const labelClass = "block text-xs font-medium text-gray-600 mb-1";
+const buttonClass =
+  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors";
+---
+
+<Layout title="Presupuestos — LógicaHogar" noindex>
+  <div class="min-h-screen bg-gray-100 print:min-h-0 print:bg-white">
+    <header class="print:hidden sticky top-0 z-10 border-b border-gray-200 bg-white">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+        <div class="flex items-center gap-3">
+          <img src="/logo.svg" alt="LógicaHogar" class="h-10" />
+          <span class="text-sm font-semibold text-primary-900">Presupuestos</span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="btn-new" class={buttonClass}>Nuevo</button>
+          <button type="button" id="btn-open" class={buttonClass}>Abrir archivo</button>
+          <button type="button" id="btn-save" class={buttonClass}>Guardar archivo</button>
+          <button
+            type="button"
+            id="btn-print"
+            class="rounded-lg bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 transition-colors"
+          >
+            Descargar PDF
+          </button>
+          <input type="file" id="file-input" accept="application/json,.json" class="hidden" />
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto grid max-w-7xl gap-8 p-6 lg:grid-cols-2 print:block print:max-w-none print:p-0">
+      <!-- Editor -->
+      <form id="editor" class="print:hidden flex flex-col gap-6" autocomplete="off">
+        <section class="rounded-2xl border border-gray-200 bg-white p-6">
+          <h2 class="mb-4 text-sm font-semibold text-primary-900">Datos generales</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class={labelClass} for="f-number">N° de presupuesto</label>
+              <input id="f-number" data-field="number" class={inputClass} placeholder="0001" />
+            </div>
+            <div>
+              <label class={labelClass} for="f-date">Fecha</label>
+              <input id="f-date" type="date" data-field="date" class={inputClass} />
+            </div>
+            <div>
+              <label class={labelClass} for="f-validity">Validez (días)</label>
+              <input id="f-validity" type="number" min="0" data-field="validityDays" class={inputClass} />
+            </div>
+            <div>
+              <label class={labelClass} for="f-currency">Moneda</label>
+              <select id="f-currency" data-field="currency" class={inputClass}>
+                <option value="ARS">Pesos (ARS)</option>
+                <option value="USD">Dólares (USD)</option>
+              </select>
+            </div>
+            <div>
+              <label class={labelClass} for="f-client">Cliente</label>
+              <input id="f-client" data-field="client" class={inputClass} placeholder="Nombre y apellido" />
+            </div>
+            <div>
+              <label class={labelClass} for="f-client-detail">Contacto / dirección</label>
+              <input
+                id="f-client-detail"
+                data-field="clientDetail"
+                class={inputClass}
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class={labelClass} for="f-subject">Asunto</label>
+            <input
+              id="f-subject"
+              data-field="subject"
+              class={inputClass}
+              placeholder="Ej: Instalación de cámaras de seguridad + NVR"
+            />
+          </div>
+          <div class="mt-4">
+            <label class={labelClass} for="f-message">Mensaje</label>
+            <textarea
+              id="f-message"
+              data-field="message"
+              rows="5"
+              class={inputClass}
+              placeholder="Gracias por contactarnos. Te compartimos las opciones que armamos para tu casa..."
+            ></textarea>
+          </div>
+        </section>
+
+        <div id="proposals" class="flex flex-col gap-6"></div>
+
+        <button
+          type="button"
+          id="btn-add-proposal"
+          class="rounded-2xl border-2 border-dashed border-gray-300 bg-white px-4 py-4 text-sm font-medium text-gray-600 hover:border-primary-400 hover:text-primary-700 transition-colors"
+        >
+          + Agregar propuesta
+        </button>
+
+        <section class="rounded-2xl border border-gray-200 bg-white p-6">
+          <label class="mb-2 block text-sm font-semibold text-primary-900" for="f-notes">
+            Notas y condiciones
+          </label>
+          <textarea
+            id="f-notes"
+            data-field="notes"
+            rows="5"
+            class={inputClass}
+            placeholder="Forma de pago, garantía, plazos de entrega, qué no incluye..."
+          ></textarea>
+        </section>
+      </form>
+
+      <!-- Preview / printable sheet -->
+      <div class="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto print:static print:max-h-none print:overflow-visible">
+        <article
+          id="sheet"
+          class="rounded-2xl bg-white p-10 text-sm text-gray-800 shadow-sm print:rounded-none print:p-0 print:shadow-none"
+        >
+        </article>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<style is:global>
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  @media print {
+    html,
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .avoid-break {
+      break-inside: avoid;
+    }
+  }
+</style>
+
+<script>
+  type Currency = "ARS" | "USD";
+
+  interface Item {
+    description: string;
+    qty: number;
+    unitPrice: number;
+  }
+
+  interface Proposal {
+    title: string;
+    description: string;
+    items: Item[];
+  }
+
+  interface Quote {
+    number: string;
+    date: string;
+    validityDays: number;
+    currency: Currency;
+    client: string;
+    clientDetail: string;
+    subject: string;
+    message: string;
+    proposals: Proposal[];
+    notes: string;
+  }
+
+  type QuoteField = Exclude<keyof Quote, "proposals">;
+
+  const STORAGE_KEY = "lh-presupuesto-draft";
+
+  const INPUT_CLASS =
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none";
+  const SMALL_BUTTON_CLASS =
+    "rounded-md px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors";
+
+  const emptyItem = (): Item => ({ description: "", qty: 1, unitPrice: 0 });
+  const emptyProposal = (): Proposal => ({ title: "", description: "", items: [emptyItem()] });
+
+  function today(): string {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  }
+
+  function emptyQuote(): Quote {
+    return {
+      number: "",
+      date: today(),
+      validityDays: 15,
+      currency: "ARS",
+      client: "",
+      clientDetail: "",
+      subject: "",
+      message: "",
+      proposals: [emptyProposal()],
+      notes: "",
+    };
+  }
+
+  function toNumber(value: unknown): number {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  // Normalizes data coming from localStorage or an imported file.
+  function normalizeQuote(raw: unknown): Quote {
+    const base = emptyQuote();
+    if (!raw || typeof raw !== "object") return base;
+    const data = raw as Record<string, unknown>;
+    const str = (key: string, fallback: string) =>
+      typeof data[key] === "string" ? (data[key] as string) : fallback;
+
+    const proposals = Array.isArray(data.proposals)
+      ? data.proposals.map((p): Proposal => {
+          const proposal = (p ?? {}) as Record<string, unknown>;
+          const items = Array.isArray(proposal.items)
+            ? proposal.items.map((i): Item => {
+                const item = (i ?? {}) as Record<string, unknown>;
+                return {
+                  description: typeof item.description === "string" ? item.description : "",
+                  qty: toNumber(item.qty),
+                  unitPrice: toNumber(item.unitPrice),
+                };
+              })
+            : [];
+          return {
+            title: typeof proposal.title === "string" ? proposal.title : "",
+            description: typeof proposal.description === "string" ? proposal.description : "",
+            items,
+          };
+        })
+      : base.proposals;
+
+    return {
+      number: str("number", base.number),
+      date: str("date", base.date),
+      validityDays: data.validityDays === undefined ? base.validityDays : toNumber(data.validityDays),
+      currency: data.currency === "USD" ? "USD" : "ARS",
+      client: str("client", base.client),
+      clientDetail: str("clientDetail", base.clientDetail),
+      subject: str("subject", base.subject),
+      message: str("message", base.message),
+      proposals,
+      notes: str("notes", base.notes),
+    };
+  }
+
+  function loadDraft(): Quote {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? normalizeQuote(JSON.parse(stored)) : emptyQuote();
+    } catch {
+      return emptyQuote();
+    }
+  }
+
+  let quote: Quote = loadDraft();
+
+  function saveDraft() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(quote));
+  }
+
+  // ---------- Formatting helpers ----------
+
+  function formatMoney(value: number): string {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: quote.currency,
+      minimumFractionDigits: 2,
+    }).format(value);
+  }
+
+  function parseDate(value: string): Date | null {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match) return null;
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  }
+
+  function formatDate(date: Date): string {
+    return date.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  }
+
+  const itemTotal = (item: Item) => item.qty * item.unitPrice;
+  const proposalTotal = (proposal: Proposal) =>
+    proposal.items.reduce((sum, item) => sum + itemTotal(item), 0);
+
+  function proposalHeading(proposal: Proposal, index: number): string {
+    const prefix = quote.proposals.length > 1 ? `Opción ${index + 1}` : "Propuesta";
+    return proposal.title.trim() ? `${prefix} — ${proposal.title.trim()}` : prefix;
+  }
+
+  // ---------- DOM helpers ----------
+
+  // Matches [label](https://...) or a bare https:// URL.
+  const LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g;
+
+  // Short label for bare URLs: the domain, plus "/…" when the URL has more after it.
+  function shortUrl(url: string): string {
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "");
+      const hasMore = parsed.pathname.length > 1 || parsed.search || parsed.hash;
+      return hasMore ? `${host}/…` : host;
+    } catch {
+      return url;
+    }
+  }
+
+  // Builds a node whose text keeps line breaks and turns URLs into clickable links.
+  function linkify<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    className: string,
+    text: string,
+  ): HTMLElementTagNameMap[K] {
+    const node = el(tag, className);
+    let last = 0;
+    for (const match of text.matchAll(LINK_PATTERN)) {
+      const index = match.index ?? 0;
+      if (index > last) node.append(text.slice(last, index));
+      const link = el("a", "text-primary-600 underline [overflow-wrap:anywhere]", match[1] ?? shortUrl(match[3]));
+      link.href = match[2] ?? match[3];
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      node.append(link);
+      last = index + match[0].length;
+    }
+    if (last < text.length) node.append(text.slice(last));
+    return node;
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    className = "",
+    text?: string,
+  ): HTMLElementTagNameMap[K] {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function button(label: string, action: string, dataset: Record<string, number> = {}) {
+    const node = el("button", SMALL_BUTTON_CLASS, label);
+    node.type = "button";
+    node.dataset.action = action;
+    for (const [key, value] of Object.entries(dataset)) node.dataset[key] = String(value);
+    return node;
+  }
+
+  function input(
+    value: string | number,
+    dataset: Record<string, string | number>,
+    attrs: Record<string, string> = {},
+  ) {
+    const node = el("input", INPUT_CLASS);
+    node.value = String(value);
+    for (const [key, v] of Object.entries(dataset)) node.dataset[key] = String(v);
+    for (const [key, v] of Object.entries(attrs)) node.setAttribute(key, v);
+    return node;
+  }
+
+  // ---------- Editor ----------
+
+  const form = document.getElementById("editor") as HTMLFormElement;
+  const proposalsContainer = document.getElementById("proposals") as HTMLDivElement;
+  const sheet = document.getElementById("sheet") as HTMLElement;
+
+  function fillGeneralFields() {
+    form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("[data-field]").forEach(
+      (field) => {
+        const key = field.dataset.field as QuoteField;
+        field.value = String(quote[key] ?? "");
+      },
+    );
+  }
+
+  function renderProposalEditor(proposal: Proposal, p: number): HTMLElement {
+    const card = el("section", "rounded-2xl border border-gray-200 bg-white p-6");
+
+    const header = el("div", "mb-4 flex items-center justify-between gap-2");
+    header.append(el("h2", "text-sm font-semibold text-primary-900", proposalHeading(proposal, p)));
+    const actions = el("div", "flex gap-1");
+    if (p > 0) actions.append(button("↑ Subir", "move-proposal-up", { p }));
+    actions.append(button("Duplicar", "duplicate-proposal", { p }));
+    if (quote.proposals.length > 1) actions.append(button("Eliminar", "remove-proposal", { p }));
+    header.append(actions);
+    card.append(header);
+
+    const title = input(proposal.title, { p, k: "title" }, { placeholder: "Título (ej: Básica, 4 cámaras)" });
+    const description = el("textarea", `${INPUT_CLASS} mt-3`);
+    description.rows = 2;
+    description.placeholder = "Descripción breve (opcional)";
+    description.value = proposal.description;
+    description.dataset.p = String(p);
+    description.dataset.k = "description";
+    card.append(title, description);
+
+    const itemsHeader = el(
+      "div",
+      "mt-5 hidden gap-2 text-xs font-medium text-gray-500 sm:grid sm:grid-cols-[1fr_4.5rem_8rem_2rem]",
+    );
+    itemsHeader.append(el("span", "", "Ítem"), el("span", "", "Cant."), el("span", "", "Precio unit."), el("span"));
+    card.append(itemsHeader);
+
+    const items = el("div", "mt-2 flex flex-col gap-2");
+    proposal.items.forEach((item, i) => {
+      const row = el("div", "grid grid-cols-[1fr_4.5rem] gap-2 sm:grid-cols-[1fr_4.5rem_8rem_2rem]");
+      row.append(
+        input(item.description, { p, i, k: "description" }, { placeholder: "Descripción del ítem", "aria-label": "Descripción" }),
+        input(item.qty, { p, i, k: "qty" }, { type: "number", min: "0", step: "any", "aria-label": "Cantidad" }),
+        input(item.unitPrice, { p, i, k: "unitPrice" }, { type: "number", min: "0", step: "0.01", "aria-label": "Precio unitario" }),
+      );
+      const remove = button("✕", "remove-item", { p, i });
+      remove.setAttribute("aria-label", "Eliminar ítem");
+      row.append(remove);
+      items.append(row);
+    });
+    card.append(items);
+
+    const footer = el("div", "mt-3 flex items-center justify-between");
+    footer.append(button("+ Agregar ítem", "add-item", { p }));
+    const total = el("span", "text-sm font-semibold text-primary-900", `Total: ${formatMoney(proposalTotal(proposal))}`);
+    total.dataset.totalFor = String(p);
+    footer.append(total);
+    card.append(footer);
+
+    return card;
+  }
+
+  function renderEditor() {
+    proposalsContainer.replaceChildren(...quote.proposals.map(renderProposalEditor));
+  }
+
+  // Updates only the totals and headings in the editor, so typing never loses focus.
+  function refreshEditorSummaries() {
+    quote.proposals.forEach((proposal, p) => {
+      const total = proposalsContainer.querySelector(`[data-total-for="${p}"]`);
+      if (total) total.textContent = `Total: ${formatMoney(proposalTotal(proposal))}`;
+      const heading = proposalsContainer.children[p]?.querySelector("h2");
+      if (heading) heading.textContent = proposalHeading(proposal, p);
+    });
+  }
+
+  // ---------- Preview ----------
+
+  function renderPreview() {
+    const nodes: HTMLElement[] = [];
+
+    const top = el("header", "flex items-start justify-between gap-6 border-b-2 border-primary-500 pb-6");
+    const logo = el("img", "h-14");
+    logo.src = "/logo.svg";
+    logo.alt = "LógicaHogar";
+    const meta = el("div", "text-right");
+    meta.append(el("p", "text-2xl font-bold text-primary-900", "Presupuesto"));
+    if (quote.number.trim()) meta.append(el("p", "text-gray-600", `N° ${quote.number.trim()}`));
+    const date = parseDate(quote.date);
+    if (date) {
+      meta.append(el("p", "text-gray-600", `Fecha: ${formatDate(date)}`));
+      if (quote.validityDays > 0) {
+        const until = new Date(date);
+        until.setDate(until.getDate() + quote.validityDays);
+        meta.append(el("p", "text-gray-600", `Válido hasta: ${formatDate(until)}`));
+      }
+    }
+    top.append(logo, meta);
+    nodes.push(top);
+
+    if (quote.client.trim() || quote.clientDetail.trim()) {
+      const client = el("section", "mt-6");
+      client.append(el("p", "text-xs font-semibold uppercase tracking-wide text-gray-500", "Cliente"));
+      if (quote.client.trim()) client.append(el("p", "font-semibold text-primary-900", quote.client.trim()));
+      if (quote.clientDetail.trim()) client.append(el("p", "text-gray-600", quote.clientDetail.trim()));
+      nodes.push(client);
+    }
+
+    if (quote.subject.trim()) {
+      nodes.push(el("h1", "mt-6 text-lg font-bold text-primary-900", quote.subject.trim()));
+    }
+
+    if (quote.message.trim()) {
+      nodes.push(linkify("p", "mt-4 whitespace-pre-line leading-relaxed", quote.message.trim()));
+    }
+
+    quote.proposals.forEach((proposal, index) => {
+      const section = el("section", "avoid-break mt-8");
+      section.append(el("h2", "text-base font-bold text-primary-800", proposalHeading(proposal, index)));
+      if (proposal.description.trim()) {
+        section.append(linkify("p", "mt-1 whitespace-pre-line text-gray-600", proposal.description.trim()));
+      }
+
+      const table = el("table", "mt-3 w-full table-fixed border-collapse");
+      const head = el("thead");
+      const headRow = el("tr", "bg-primary-50 text-left text-xs uppercase tracking-wide text-primary-900");
+      headRow.append(
+        el("th", "px-3 py-2 font-semibold", "Descripción"),
+        el("th", "w-16 px-3 py-2 text-right font-semibold", "Cant."),
+        el("th", "w-32 px-3 py-2 text-right font-semibold", "P. unitario"),
+        el("th", "w-36 px-3 py-2 text-right font-semibold", "Subtotal"),
+      );
+      head.append(headRow);
+
+      const body = el("tbody");
+      proposal.items
+        .filter((item) => item.description.trim() || item.unitPrice)
+        .forEach((item) => {
+          const row = el("tr", "border-b border-gray-100");
+          row.append(
+            linkify("td", "px-3 py-2 [overflow-wrap:anywhere]", item.description.trim()),
+            el("td", "px-3 py-2 text-right tabular-nums", String(item.qty)),
+            el("td", "px-3 py-2 text-right tabular-nums", formatMoney(item.unitPrice)),
+            el("td", "px-3 py-2 text-right tabular-nums", formatMoney(itemTotal(item))),
+          );
+          body.append(row);
+        });
+
+      const foot = el("tfoot");
+      const totalRow = el("tr");
+      const totalLabel = el("td", "px-3 pt-3 text-right font-semibold text-primary-900", "Total");
+      totalLabel.colSpan = 3;
+      totalRow.append(
+        totalLabel,
+        el("td", "px-3 pt-3 text-right text-base font-bold tabular-nums text-primary-900", formatMoney(proposalTotal(proposal))),
+      );
+      foot.append(totalRow);
+
+      table.append(head, body, foot);
+      section.append(table);
+      nodes.push(section);
+    });
+
+    if (quote.notes.trim()) {
+      const notes = el("section", "avoid-break mt-8 rounded-lg bg-gray-50 p-4");
+      notes.append(el("p", "text-xs font-semibold uppercase tracking-wide text-gray-500", "Notas y condiciones"));
+      notes.append(linkify("p", "mt-2 whitespace-pre-line text-gray-700", quote.notes.trim()));
+      nodes.push(notes);
+    }
+
+    const footer = el("footer", "avoid-break mt-10 border-t border-gray-200 pt-4 text-center text-xs text-gray-500");
+    footer.append(
+      el("p", "font-semibold text-primary-900", "LógicaHogar — Tu casa, con sentido común"),
+      el("p", "mt-1", "WhatsApp +54 9 11 3349-8319 · info@logicahogar.com.ar · logicahogar.com.ar"),
+    );
+    nodes.push(footer);
+
+    sheet.replaceChildren(...nodes);
+  }
+
+  // ---------- Events ----------
+
+  function update({ rebuildEditor = false } = {}) {
+    if (rebuildEditor) renderEditor();
+    else refreshEditorSummaries();
+    renderPreview();
+    saveDraft();
+  }
+
+  form.addEventListener("input", (event) => {
+    const target = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    const { field, p, i, k } = target.dataset;
+
+    if (field) {
+      const key = field as QuoteField;
+      if (key === "validityDays") quote.validityDays = toNumber(target.value);
+      else if (key === "currency") quote.currency = target.value === "USD" ? "USD" : "ARS";
+      else quote[key] = target.value;
+    } else if (p !== undefined && k) {
+      const proposal = quote.proposals[Number(p)];
+      if (!proposal) return;
+      if (i !== undefined) {
+        const item = proposal.items[Number(i)];
+        if (!item) return;
+        if (k === "description") item.description = target.value;
+        else if (k === "qty") item.qty = toNumber(target.value);
+        else if (k === "unitPrice") item.unitPrice = toNumber(target.value);
+      } else if (k === "title") proposal.title = target.value;
+      else if (k === "description") proposal.description = target.value;
+    }
+
+    update();
+  });
+
+  proposalsContainer.addEventListener("click", (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-action]");
+    if (!target) return;
+    const p = Number(target.dataset.p);
+    const i = Number(target.dataset.i);
+    const proposal = quote.proposals[p];
+    if (!proposal) return;
+
+    switch (target.dataset.action) {
+      case "add-item":
+        proposal.items.push(emptyItem());
+        break;
+      case "remove-item":
+        proposal.items.splice(i, 1);
+        break;
+      case "duplicate-proposal":
+        quote.proposals.splice(p + 1, 0, structuredClone(proposal));
+        break;
+      case "remove-proposal":
+        if (!confirm(`¿Eliminar "${proposalHeading(proposal, p)}"?`)) return;
+        quote.proposals.splice(p, 1);
+        break;
+      case "move-proposal-up":
+        [quote.proposals[p - 1], quote.proposals[p]] = [quote.proposals[p], quote.proposals[p - 1]];
+        break;
+      default:
+        return;
+    }
+    update({ rebuildEditor: true });
+  });
+
+  document.getElementById("btn-add-proposal")?.addEventListener("click", () => {
+    quote.proposals.push(emptyProposal());
+    update({ rebuildEditor: true });
+  });
+
+  function replaceQuote(next: Quote) {
+    quote = next;
+    fillGeneralFields();
+    update({ rebuildEditor: true });
+  }
+
+  document.getElementById("btn-new")?.addEventListener("click", () => {
+    if (!confirm("¿Empezar un presupuesto nuevo? Se va a borrar el borrador actual.")) return;
+    replaceQuote(emptyQuote());
+  });
+
+  function fileBaseName(): string {
+    const slug = (quote.client || quote.subject || "borrador")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .toLowerCase();
+    return `presupuesto-${quote.number.trim() || quote.date}-${slug}`;
+  }
+
+  document.getElementById("btn-save")?.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(quote, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${fileBaseName()}.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 0);
+  });
+
+  const fileInput = document.getElementById("file-input") as HTMLInputElement;
+  document.getElementById("btn-open")?.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    fileInput.value = "";
+    if (!file) return;
+    try {
+      replaceQuote(normalizeQuote(JSON.parse(await file.text())));
+    } catch {
+      alert("No se pudo leer el archivo. ¿Es un presupuesto guardado desde acá?");
+    }
+  });
+
+  // The browser uses the document title as the default PDF file name.
+  const originalTitle = document.title;
+  window.addEventListener("beforeprint", () => {
+    document.title = fileBaseName();
+  });
+  window.addEventListener("afterprint", () => {
+    document.title = originalTitle;
+  });
+  document.getElementById("btn-print")?.addEventListener("click", () => window.print());
+
+  fillGeneralFields();
+  update({ rebuildEditor: true });
+</script>
